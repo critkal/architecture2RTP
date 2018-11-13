@@ -142,7 +142,7 @@ dimension Tempereature
 						using
 						ports:
 						
-						
+						temp: CTempereatureIPT;
 						average1 : CTemperatureOPT;
 					}
 					connectors:
@@ -150,6 +150,7 @@ dimension Tempereature
 					tgt : CTemperatureCN bindings target1 = target;
 					delegations:
 					userTemp to userTemp  
+				temp to temp
 				}
 			}
 			component def PresenceCheckerCP {
