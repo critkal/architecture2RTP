@@ -1,0 +1,180 @@
+Model SysADLArchitecture;
+package SysADL.types {
+	value type Int {
+	}
+	value type Boolean {
+	}
+	value type String {
+	}
+	value type Void {
+	}
+	value type Real {
+	}
+dimension Tempereature
+	unit Celsius {
+		dimension = Tempereature }
+		unit Fahrenheit {
+			dimension = Tempereature }
+			value type Temp {
+				dimension = Tempereature
+			}
+			value type CelsiusTemperature extends Temp {
+				unit = Celsius
+				dimension = Tempereature
+			}
+			value type FahrenheitTemperature extends Temp {
+				unit = Fahrenheit
+				dimension = Tempereature
+			}
+			enum Command {
+				on, off
+			}
+			datatype Commands {
+				attributes:
+				heater : Command;
+				cooler : Command;
+			}
+		}
+		package Ports {
+			import SysADL.types;
+			port def FTemperatureOPT {
+				flow out FahrenheitTemperature
+			}
+			port def CTempereatureIPT {
+				flow in CelsiusTemperature
+			}
+			port def teste {
+				ports:
+				port1 : FTemperatureOPT;
+				port2 : CTempereatureIPT;
+			}
+		port def CTemperatureOPT {
+				flow out CelsiusTemperature
+			}
+		}
+		package Connectors {
+			import Ports;
+			connector def FahrenheitToCelsiusCN {
+				participants:
+				~p2 : FTemperatureOPT [ 1, -1 ];
+				~p1 : CTempereatureIPT;
+				flows:
+				FahrenheitTemperature from p2 to p1
+			}
+		connector def CTemperatureCN {
+				participants:
+				~source : CTempereatureIPT;
+				~destination : CTemperatureOPT;
+				flows:
+				CelsiusTemperature from destination to source
+			}
+		}
+		package Components {
+			import Connectors;
+		import Ports;
+			component def Arch1 {
+				configuration {
+					components:
+					ui : UserInterfaceCP {
+						using
+						ports:
+						desired : CTemperatureOPT;
+					}
+					s1 : TemperatureSensorCP {
+						using
+						ports:
+						current1 : FTemperatureOPT;
+					}
+					rtc : RoomTemperatureControllerCP {
+						using
+						ports:
+						temp : CTempereatureIPT;
+						userTemp : CTempereatureIPT;
+					}
+					s2 : TemperatureSensorCP {
+						using
+						ports:
+						current2 : FTemperatureOPT;
+					}
+					s3 : TemperatureSensorCP {
+						using
+						ports:
+						current3 : FTemperatureOPT;
+					}
+					connectors:
+					
+					
+					uc : CTemperatureCN bindings desired = userTemp;
+				c2 : FahrenheitToCelsiusCN bindings current2 = temp;
+					c1 : FahrenheitToCelsiusCN bindings current1 = temp;
+					c3 : FahrenheitToCelsiusCN bindings current3 = temp;
+				}
+			}
+			boundary component def UserInterfaceCP {
+				ports:
+				desired : CTemperatureOPT;
+			}
+			boundary component def TemperatureSensorCP {
+				ports:
+				current : FTemperatureOPT;
+			}
+			component def RoomTemperatureControllerCP {
+				ports:
+				
+				
+				userTemp : CTempereatureIPT;
+				temp : CTempereatureIPT;
+				configuration {
+					components:
+					cm : CommanderCP {
+						using
+						ports:
+						average : CTempereatureIPT;
+						target : CTempereatureIPT;
+					}
+					pc : PresenceCheckerCP {
+						using
+						ports:
+						userTemp : CTempereatureIPT;
+						target1 : CTemperatureOPT;
+					}
+					sm : SensorsMonitorCP {
+						using
+						ports:
+						
+						
+						average1 : CTemperatureOPT;
+					}
+					connectors:
+					avg : CTemperatureCN bindings average1 = average;
+					tgt : CTemperatureCN bindings target1 = target;
+					delegations:
+					userTemp to userTemp  
+				}
+			}
+			component def PresenceCheckerCP {
+				ports:
+				userTemp : CTempereatureIPT;
+				target : CTemperatureOPT;
+			}
+			component def SensorsMonitorCP {
+				ports:
+				s1 : CTempereatureIPT;
+				s2 : CTempereatureIPT;
+				average : CTemperatureOPT;
+			}
+			component def CommanderCP {
+				ports:
+				average : CTempereatureIPT;
+				target : CTempereatureIPT;
+			}
+		}
+		Requirement ControlRoomTemperatureFR ( 1 ) {
+			text = "O controlador deve ser capaz de manter a temperatura da sala"
+			Requirement teste ( 2 ) {
+				text = teste
+			}
+		}
+		Requirement teste1 ( 3 ) {
+			text = teste2 derive ControlRoomTemperatureFR;
+		}
